@@ -19,7 +19,7 @@
 
 ## About
 
-ShowPR-Community is an open source, community edition of ShowPR -- a developer-focused platform to manage, visualize, and showcase your GitHub open source contributions ever before.
+ShowPR is an open source, developer-focused platform to manage, visualize, and showcase your GitHub open source contributions ever before.
 
 Crossed **350+ users** and **150+ upvotes** on Product Hunt.
 
