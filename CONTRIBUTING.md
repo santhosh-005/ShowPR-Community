@@ -1,206 +1,174 @@
 # Contributing to ShowPR Community Edition
 
-Thank you for your interest in contributing to ShowPR! This guide will help you get started and ensure a smooth contribution experience.
-
-## Table of Contents
-
-- [Getting Started](#getting-started)
-- [How to Contribute](#how-to-contribute)
-- [Git Commit Conventions](#git-commit-conventions)
-- [Branch Naming](#branch-naming)
-- [Pull Request Guidelines](#pull-request-guidelines)
-- [Issue Guidelines](#issue-guidelines)
-- [Code Style](#code-style)
-- [Recognition and Rewards](#recognition-and-rewards)
-- [Code of Conduct](#code-of-conduct)
+Thank you for your interest in contributing! This guide covers everything you need to get started.
 
 ---
 
-## Getting Started
+## Step 1: Understand the Project
 
-1. **Fork the repository** on GitHub.
+Before writing any code, take time to understand what ShowPR does and how it works.
 
-2. **Clone your fork** locally:
+1. **Use the live app** at [show-pr.vercel.app](https://show-pr.vercel.app). Sign in, explore the dashboard, try the filters, preview a public profile, and test the embed/badge features.
+2. **Read the [Architecture Docs](docs/ARCHITECTURE.md)** to understand the codebase structure, data flow, and design decisions.
+3. **Browse the codebase** and get familiar with how components, API routes, and utilities are organized.
+
+---
+
+## Step 2: Set Up Locally
+
+1. Fork the repository on GitHub.
+
+2. Clone your fork and set up upstream:
 
    ```bash
    git clone https://github.com/<your-username>/ShowPR-Community.git
    cd ShowPR-Community
-   ```
-
-3. **Add the upstream remote**:
-
-   ```bash
    git remote add upstream https://github.com/santhosh-005/ShowPR-Community.git
    ```
 
-4. **Install dependencies**:
+3. Install dependencies:
 
    ```bash
    npm install
    ```
 
-5. **Set up environment variables**:
+4. Configure environment variables:
 
    ```bash
    cp .env.example .env.local
    ```
 
-   Fill in the required values. See [README.md](README.md#environment-variables) for details.
+   Fill in the required values. See `.env.example` for documentation on each variable.
 
-6. **Run the development server**:
+5. Set up the database. Create the `github_profiles` table in your Supabase project:
+
+   ```sql
+   CREATE TABLE github_profiles (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     github_username TEXT UNIQUE NOT NULL,
+     encrypted_token TEXT,
+     iv TEXT,
+     settings JSONB DEFAULT '{}',
+     email TEXT,
+     created_at TIMESTAMPTZ DEFAULT NOW(),
+     updated_at TIMESTAMPTZ DEFAULT NOW()
+   );
+   ```
+
+6. Run the development server:
 
    ```bash
    npm run dev
    ```
 
-7. **Understand the project**: Read the [Architecture Documentation](docs/ARCHITECTURE.md) to understand the codebase structure, data flow, and design decisions.
+   Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## How to Contribute
+## Step 3: Find Something to Work On
 
-### Reporting Bugs
-
-- Search [existing issues](https://github.com/santhosh-005/ShowPR-Community/issues) to avoid duplicates.
-- Use the [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md) when creating a new issue.
-- Include steps to reproduce, expected behavior, and screenshots if applicable.
-
-### Suggesting Features
-
-- Open a new issue using the [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.md).
-- Describe the problem you are trying to solve, not just the solution.
-- Be open to discussion -- maintainers may suggest alternative approaches.
-
-### Submitting Code
-
-1. **Check for an existing issue** or create one before starting work.
-2. **Comment on the issue** to let others know you are working on it.
-3. **Create a branch** from `main` (see [Branch Naming](#branch-naming)).
-4. **Make your changes** with clear, focused commits (see [Git Commit Conventions](#git-commit-conventions)).
-5. **Test your changes** locally.
-6. **Push your branch** and open a pull request.
+- Browse [open issues](https://github.com/santhosh-005/ShowPR-Community/issues).
+- Look for `good first issue` or `level1` labels if you are new.
+- Comment on the issue to let others know you are picking it up.
+- If you have a new idea, open an issue first before starting work.
 
 ---
 
-## Git Commit Conventions
+## Step 4: Make Your Changes
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/). Every commit message must follow this format:
+1. Create a branch from `main`:
 
-```
-<type>(<scope>): <short description>
-```
+   ```
+   <type>/issue-<number>-<short-description>
+   ```
 
-### Types
+   Examples: `feat/issue-12-toast-notifications`, `fix/issue-8-dark-mode-bug`
 
-| Type | Description |
-|------|-------------|
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation changes only |
-| `style` | Code style changes (formatting, semicolons, etc.) |
-| `refactor` | Code restructuring without changing behavior |
-| `test` | Adding or updating tests |
-| `chore` | Maintenance tasks (dependencies, configs, CI) |
-| `perf` | Performance improvements |
+2. Write clear, focused commits following [Conventional Commits](https://www.conventionalcommits.org/):
 
-### Examples
+   ```
+   <type>(<scope>): <short description>
+   ```
 
-```
-feat(dashboard): add search highlight for filtered PRs
-fix(auth): handle expired GitHub tokens gracefully
-docs(readme): add Supabase setup instructions
-style(navbar): fix inconsistent spacing in mobile menu
-refactor(api): extract GitHub GraphQL queries to constants
-test(utils): add tests for generateMonthRanges function
-chore(deps): update next to v15.3.2
-```
+   | Type | Use for |
+   |------|---------|
+   | `feat` | New feature |
+   | `fix` | Bug fix |
+   | `docs` | Documentation only |
+   | `style` | Formatting, no logic change |
+   | `refactor` | Restructuring without behavior change |
+   | `test` | Adding or updating tests |
+   | `chore` | Maintenance, dependencies, CI |
+
+3. Test your changes locally before pushing.
 
 ---
 
-## Branch Naming
+## Step 5: Submit a Pull Request
 
-Use descriptive branch names following this convention:
+- Link the related issue (e.g., "Closes #12").
+- Keep PRs focused -- one feature or fix per PR.
+- Include screenshots for any UI changes.
+- Run `npm run lint` before submitting.
+- Be responsive to review feedback.
 
-```
-<type>/issue-<number>-<short-description>
-```
-
-### Examples
-
-```
-feat/issue-12-toast-notifications
-fix/issue-8-dark-mode-persistence
-docs/issue-15-api-documentation
-```
+A maintainer will review your PR, typically within a day. You may be asked to make changes -- this is normal.
 
 ---
 
-## Pull Request Guidelines
+## Ways to Contribute
 
-- **Fill out the PR template** completely.
-- **Link the related issue** (e.g., "Closes #12").
-- **Keep PRs focused** -- one feature or fix per PR.
-- **Include screenshots** for any UI changes.
-- **Ensure no lint errors** -- run `npm run lint` before submitting.
-- **Write descriptive titles** using the same convention as commits (e.g., `feat(dashboard): add toast notifications`).
-- **Be responsive** to review feedback.
+Contributions are not limited to code. Here are all the ways you can help:
 
-### PR Review Process
+**Code Contributions**
+- Fix bugs, add features, improve performance, write tests.
 
-1. A maintainer will review your PR mostly within a day.
-2. You may be asked to make changes -- this is normal and part of the process.
-3. Once approved, a maintainer will merge your PR.
+**Design and UX**
+- Improve layouts, interactions, or visual consistency.
+- Follow the existing theme and color system. Keep designs clean, professional, and minimal.
+- Avoid using heavy UI libraries or distracting animations.
 
----
+**Research and Findings**
+- Investigate best practices, tools, or approaches relevant to the project.
+- Submit your findings as an issue or discussion with a clear summary.
 
-## Issue Guidelines
+**Feature Proposals**
+- Suggest new features or improvements to existing ones.
+- Open an issue describing the problem you are solving and your proposed approach.
 
-- **Search before creating** -- your issue may already exist.
-- **Use templates** -- they help maintainers understand and triage your issue faster.
-- **Be specific** -- vague issues are hard to act on.
-- **Feature requests are welcome** -- we encourage the community to propose new ideas.
-- **One issue per topic** -- don't combine unrelated bugs or features.
+**Documentation**
+- Improve existing docs, add missing guides, fix typos.
 
 ---
 
 ## Code Style
 
-ShowPR follows these conventions:
+- **TypeScript** preferred for new components. JavaScript is acceptable for existing patterns.
+- **Tailwind CSS** for styling. Follow existing utility class patterns.
+- **Imports** use path aliases: `@/components/...`, `@/lib/...`
+- **Files** use kebab-case (`pr-card.tsx`). Component exports use PascalCase.
+- **API routes** follow Next.js App Router conventions.
 
-- **TypeScript / JavaScript** -- the project uses a mix; new components should use TypeScript where possible.
-- **React** -- functional components with hooks.
-- **Styling** -- Tailwind CSS utility classes. Follow existing patterns in the codebase.
-- **Imports** -- use path aliases (`@/components/...`, `@/lib/...`).
-- **File naming** -- kebab-case for files (`pr-card.tsx`), PascalCase for component exports.
-- **API routes** -- Next.js App Router conventions with `route.ts` / `route.js`.
-
-When in doubt, follow the patterns you see in the existing code.
+When in doubt, match the existing code.
 
 ---
 
 ## Recognition and Rewards
 
-We believe in recognizing the people who help build ShowPR:
+- **All contributors** are acknowledged and featured in the README and community pages.
+- **Top contributors** may receive rewards, be invited to join the **ShowPR Founding Team**, or receive special mentions and featuring across ShowPR platforms.
 
-- **All contributors** will be acknowledged and Featured  in the README and community pages.
-- **Top contributors** who consistently deliver quality work will be:
-  - Featured prominently in the README and community pages with Top Badges.
-  - Invited to join the **ShowPR Founding Team**.
-  - Given cashbacks or swags.
-
-Your contributions matter -- whether it is a one-line typo fix or a major feature.
+Every contribution matters -- from a typo fix to a major feature.
 
 ---
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold a welcoming, inclusive, and respectful environment for everyone.
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold a welcoming and respectful environment.
 
 ---
 
 ## Questions?
-
-If you have questions about contributing, feel free to:
 
 - Open a [Discussion](https://github.com/santhosh-005/ShowPR-Community/discussions) (if enabled).
 - Comment on a relevant issue.
