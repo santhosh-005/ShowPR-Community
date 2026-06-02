@@ -100,7 +100,15 @@ Before writing any code, take time to understand what ShowPR does and how it wor
    | `test` | Adding or updating tests |
    | `chore` | Maintenance, dependencies, CI |
 
-3. Test your changes locally before pushing.
+3. **You are fully responsible for testing your changes before raising a PR.** Do not rely on maintainers or reviewers to catch issues for you.
+
+   - Test all affected features and edge cases locally.
+   - Verify that existing functionality is not broken.
+   - Run `npm run lint` and fix any warnings or errors.
+   - If your change touches UI, test across different screen sizes.
+   - If your change touches API routes or data, verify with real or mocked data.
+
+   > **A PR with insufficient testing may be closed without review.**
 
 ---
 
@@ -108,9 +116,32 @@ Before writing any code, take time to understand what ShowPR does and how it wor
 
 - Link the related issue (e.g., "Closes #12").
 - Keep PRs focused -- one feature or fix per PR.
-- Include screenshots for any UI changes.
 - Run `npm run lint` before submitting.
 - Be responsive to review feedback.
+
+### Proof of Work (Required)
+
+Every PR **must** include proof that your changes work as expected. PRs without proof of work will not be reviewed.
+
+| Change Type | Required Proof |
+|---|---|
+| **UI changes** | Screenshots showing the before and after states |
+| **Interactive/flow changes** | Screen recording (video or GIF) demonstrating the full user flow |
+| **Bug fixes** | Screenshots or recordings showing the bug is resolved |
+| **API/logic changes** | Screenshots of test results, API responses, or console output |
+| **New features** | Screen recording of the feature in action **+ Architecture diagram** (see below) |
+
+### Architecture Diagram (Required for New Features)
+
+If your PR introduces a **new feature**, you must include an architecture diagram in the PR description. This helps reviewers understand your design decisions and how the feature fits into the existing system.
+
+Your diagram should cover:
+- Component structure and relationships
+- Data flow (where data comes from, how it is transformed, where it is stored)
+- Any new API routes, database tables, or external service integrations
+- How the feature interacts with existing modules
+
+You can use tools like [Excalidraw](https://excalidraw.com), [draw.io](https://draw.io), [Mermaid](https://mermaid.js.org), or any diagramming tool of your choice.
 
 A maintainer will review your PR, typically within a day. You may be asked to make changes -- this is normal.
 
