@@ -18,7 +18,6 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -82,18 +81,11 @@ export default function Navbar() {
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
                 <button className="relative rounded-full h-8 w-8 p-0 overflow-hidden border border-border">
-                  {session?.user?.image && !avatarError ? (
-                    <img
-                      src={session.user.image}
-                      alt={session.user.name || "U"}
-                      className="h-8 w-8 rounded-full object-cover"
-                      onError={() => setAvatarError(true)}
-                    />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
-                      {(session?.user?.name?.[0] || "U").toUpperCase()}
-                    </div>
-                  )}
+                  <img
+                    src={session?.user?.image || ""}
+                    alt={session?.user?.name || "U"}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
                 </button>
               </DropdownMenu.Trigger>
 

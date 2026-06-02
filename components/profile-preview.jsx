@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   GitPullRequest,
   GitMerge,
@@ -14,7 +13,6 @@ import Link from "next/link";
 
 
 export function ProfilePreview({profile, summary,settings, pullRequests, monthlyData}) {
-  const [imgError, setImgError] = useState(false);
   if (!profile || !summary) {
     return (
       <div className="container py-4 px-2 sm:px-6">
@@ -34,12 +32,11 @@ export function ProfilePreview({profile, summary,settings, pullRequests, monthly
             {/* Header with User Info - Improved for mobile */}
             <div className="flex flex-col sm:flex-row gap-4 items-center sm:items-start mb-6">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-secondary flex-shrink-0 flex items-center justify-center">
-                {profile.image && !imgError ? (
+                {profile.image ? (
                   <img
                     src={profile.image}
                     alt={profile.name}
                     className="rounded-full w-full h-full object-cover"
-                    onError={() => setImgError(true)}
                   />
                 ) : (
                   <Github className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
