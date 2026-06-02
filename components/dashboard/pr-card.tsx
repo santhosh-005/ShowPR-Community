@@ -8,6 +8,7 @@ import {
 import { format } from "date-fns";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { HighlightedText } from "@/components/dashboard/highlighted-text";
 
 type PullRequest = {
   id: string;
@@ -25,9 +26,10 @@ type PullRequest = {
 interface PullRequestCardProps {
   pullRequest: PullRequest;
   compact?: boolean;
+  searchQuery?: string;
 }
 
-export function PullRequestCard({ pullRequest, compact }: PullRequestCardProps) {
+export function PullRequestCard({ pullRequest, compact, searchQuery = "" }: PullRequestCardProps) {
   const { title, number, url, state, createdAt, repository } = pullRequest;
  
   // Format date
@@ -82,7 +84,7 @@ export function PullRequestCard({ pullRequest, compact }: PullRequestCardProps) 
                 compact && "text-xs"
               )}
             >
-              {title}
+              <HighlightedText text={title} query={searchQuery} />
               <span className={cn(
                 "text-muted-foreground font-normal ml-1.5",
                 compact && "text-xs"
@@ -111,7 +113,7 @@ export function PullRequestCard({ pullRequest, compact }: PullRequestCardProps) 
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors hover:underline"
             >
-              {repository.name}
+              <HighlightedText text={repository.name} query={searchQuery} />
             </Link>
            
             <div className="flex items-center space-x-4">
