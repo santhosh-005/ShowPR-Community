@@ -420,7 +420,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3 h-[calc(100vh-280px)] md:h-[calc(100vh-220px)] overflow-y-auto pr-1 md:pr-2">
                 {filteredPRs.map((pr) => (
-                  <PullRequestCard key={pr.id} pullRequest={pr} />
+                  <PullRequestCard key={pr.id} pullRequest={pr} searchQuery={searchQuery} />
                 ))}
 
               </div>
