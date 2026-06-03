@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { GitPullRequest, Menu, X, Github, User, BarChart2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
@@ -18,7 +18,10 @@ export default function Navbar() {
   const { data: session, status } = useSession();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [navAvatarError, setNavAvatarError] = useState(false);
   const pathname = usePathname();
+
+  const handleNavAvatarError = useCallback(() => setNavAvatarError(true), []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -80,12 +83,17 @@ export default function Navbar() {
           {status === "authenticated" ? (
             <DropdownMenu.Root>
               <DropdownMenu.Trigger asChild>
-                <button className="relative rounded-full h-8 w-8 p-0 overflow-hidden border border-border">
-                  <img
-                    src={session?.user?.image || ""}
-                    alt={session?.user?.name || "U"}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
+                <button className="relative rounded-full h-8 w-8 p-0 overflow-hidden border border-border flex items-center justify-center bg-secondary">
+                  {session?.user?.image && !navAvatarError ? (
+                    <img
+                      src={session.user.image}
+                      alt={session?.user?.name || "User avatar"}
+                      className="h-8 w-8 rounded-full object-cover"
+                      onError={handleNavAvatarError}
+                    />
+                  ) : (
+                    <Github className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </button>
               </DropdownMenu.Trigger>
 
