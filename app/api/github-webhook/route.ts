@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from '@/lib/supabaseClient'
 
-const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET!;
+const GITHUB_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET;
 
+if (!GITHUB_WEBHOOK_SECRET) {
+  throw new Error("GITHUB_WEBHOOK_SECRET is not configured");
+}
 export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-hub-signature-256");
   const body = await req.text();
