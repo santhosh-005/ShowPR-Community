@@ -22,7 +22,10 @@ export async function GET(req: NextRequest) {
     // Get parameters from URL
     const { searchParams } = new URL(req.url);
     const cursor = searchParams.get('cursor') || null;
-    const limit = parseInt(searchParams.get('limit') || '30');
+   const limit = Math.min(
+  Math.max(parseInt(searchParams.get("limit") || "30", 10) || 30, 1),
+  100
+);
     
     // Get the token from the session JWT
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET }) as Token | null;
