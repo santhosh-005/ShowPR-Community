@@ -126,10 +126,11 @@ export async function GET(request, { params }) {
     const sectionWidth = width / 3;
     
     // Calculate PR status segments for the circle
-    const totalStatusCount = userData.prStatus.total;
-    const mergedPercent = (userData.prStatus.merged / totalStatusCount) * 100;
-    const openPercent = (userData.prStatus.open / totalStatusCount) * 100;
-    const closedPercent = (userData.prStatus.closed / totalStatusCount) * 100;
+    const totalStatusCount = userData.prStatus.total || 1;
+
+const mergedPercent = (userData.prStatus.merged / totalStatusCount) * 100;
+const openPercent = (userData.prStatus.open / totalStatusCount) * 100;
+const closedPercent = (userData.prStatus.closed / totalStatusCount) * 100;
     
     // Circle dimensions (increased size)
     const radius = 50;
