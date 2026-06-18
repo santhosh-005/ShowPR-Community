@@ -16,6 +16,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import * as Switch from '@radix-ui/react-switch';
 import { ProfilePreview } from "@/components/profile-preview";
 import { useSharedState } from "../context/SharedStateContext";
+import { useToast } from "@/components/toast";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -35,6 +36,7 @@ export default function ProfilePage() {
     hasChanges,
     error
   } = useSharedState();
+  const { addToast } = useToast();
   const [copiedState, setCopiedState] = useState({
     profile: false,
     github: false,
@@ -67,13 +69,15 @@ export default function ProfilePage() {
       
       if (!res.ok) {
         console.error('Save failed:', result.error);
+        addToast(result.error || 'Failed to save changes', 'error');
       } else {
-        setOriginalData(profilePageData); // Update original data
-        setHasChanges(false); // Reset changes flag
+        setOriginalData(profilePageData);
+        setHasChanges(false);
+        addToast('Profile saved successfully', 'success');
       }
     } catch (error) {
       console.error('Save failed:', error);
-      alert('Failed to save changes!');
+      addToast('Failed to save changes', 'error');
     }
 
     setSendStatus("done");
@@ -82,12 +86,13 @@ export default function ProfilePage() {
     }, 3000);
   }
 
-  const handleCopy = (text, target) => {
+  const handleCopy = (text, target, label) => {
     navigator.clipboard.writeText(text); 
     setCopiedState(prev => ({
       ...prev,
       [target]: true
     }));
+    addToast(`${label || target} copied to clipboard`, 'success');
     setTimeout(() => {
       setCopiedState(prev => ({
         ...prev,
@@ -127,7 +132,7 @@ const addToCustomPRs = (pr) => {
     return;
   }
   if (profilePageData.customPRs?.length >= 10) {
-    alert("You can't select more than 10 PRs");
+    addToast("You can't select more than 10 PRs", 'error');
     return;
   }
   const updatedCustomPRs = [...profilePageData.customPRs, pr];
@@ -497,7 +502,7 @@ const removeFromCustomPRs = (prId) => {
                         />
                         <button
                           className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 w-9"
-                          onClick={() => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${session?.github?.login}`, "profile")}
+                          onClick={() => handleCopy(`${process.env.NEXT_PUBLIC_BASE_URL}/${session?.github?.login}`, "profile", "Profile link")}
                         >
                            {copiedState.profile ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                         </button>
@@ -524,7 +529,7 @@ const removeFromCustomPRs = (prId) => {
                           />
                           <button
                             className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
-                            onClick={() => handleCopy(`[![ShowPR](${process.env.NEXT_PUBLIC_BASE_URL}/api/badge/${session?.github?.login}?v=1)](${process.env.NEXT_PUBLIC_BASE_URL}/${session?.github?.login})`,"github")}
+                            onClick={() => handleCopy(`[![ShowPR](${process.env.NEXT_PUBLIC_BASE_URL}/api/badge/${session?.github?.login}?v=1)](${process.env.NEXT_PUBLIC_BASE_URL}/${session?.github?.login})`,"github", "Badge code")}
                           >
                             {copiedState.github ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </button>
@@ -548,7 +553,7 @@ const removeFromCustomPRs = (prId) => {
                           />
                           <button
                             className="absolute top-2 right-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
-                            onClick={() => handleCopy(embedCode, "website")}
+                            onClick={() => handleCopy(embedCode, "website", "Embed code")}
                           >
                             {copiedState.website ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                           </button>
