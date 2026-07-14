@@ -16,6 +16,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import * as Switch from '@radix-ui/react-switch';
 import { ProfilePreview } from "@/components/profile-preview";
 import { useSharedState } from "../context/SharedStateContext";
+import { useToast } from "@/components/Toast";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -40,6 +41,7 @@ export default function ProfilePage() {
     github: false,
     website: false
   });
+  const toast = useToast();
   const [sendStatus, setSendStatus] = useState('idle');
   const [prSearchQuery, setPrSearchQuery] = useState('');
 
@@ -67,13 +69,15 @@ export default function ProfilePage() {
       
       if (!res.ok) {
         console.error('Save failed:', result.error);
+        toast('Failed to save changes!', 'error');
       } else {
-        setOriginalData(profilePageData); // Update original data
-        setHasChanges(false); // Reset changes flag
+        setOriginalData(profilePageData);
+        setHasChanges(false);
+        toast('Changes saved successfully!', 'success');
       }
     } catch (error) {
       console.error('Save failed:', error);
-      alert('Failed to save changes!');
+      toast('Failed to save changes!', 'error');
     }
 
     setSendStatus("done");
@@ -83,7 +87,8 @@ export default function ProfilePage() {
   }
 
   const handleCopy = (text, target) => {
-    navigator.clipboard.writeText(text); 
+    navigator.clipboard.writeText(text);
+    toast('Copied to clipboard!', 'success');
     setCopiedState(prev => ({
       ...prev,
       [target]: true
@@ -127,7 +132,7 @@ const addToCustomPRs = (pr) => {
     return;
   }
   if (profilePageData.customPRs?.length >= 10) {
-    alert("You can't select more than 10 PRs");
+    toast("You can't select more than 10 PRs", 'error');
     return;
   }
   const updatedCustomPRs = [...profilePageData.customPRs, pr];
