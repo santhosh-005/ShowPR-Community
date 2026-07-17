@@ -34,5 +34,25 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Handle pull request changes to invalidate user cache
+  const prAuthor = payload.pull_request?.user?.login;
+  if (event === "pull_request" && prAuthor) {
+    const { data: profile } = await supabase
+      .from('github_profiles')
+      .select('settings')
+      .eq('github_username', prAuthor)
+      .single();
+    
+    if (profile && profile.settings && profile.settings._cache) {
+      const settings = profile.settings;
+      delete settings._cache;
+      
+      await supabase
+        .from('github_profiles')
+        .update({ settings })
+        .eq('github_username', prAuthor);
+    }
+  }
+
   return NextResponse.json({ success: true });
 }
