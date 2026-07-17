@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from "next-auth/jwt";
 import { fetchPullRequests, fetchMonthlyPRStats } from '@/lib/github-api-utils';
+import { supabase } from '@/lib/supabaseClient';
 
 // Define the type for the JWT token
 interface Token {
@@ -34,6 +35,24 @@ export async function GET(req: NextRequest) {
     }
     
     const accessToken = token.accessToken;
+    const username = token.github?.login;
+    const isFirstPage = !cursor && limit === 30;
+
+    if (isFirstPage && username) {
+      const { data: profile } = await supabase
+        .from('github_profiles')
+        .select('settings')
+        .eq('github_username', username)
+        .single();
+      
+      if (profile && profile.settings) {
+        const cache = profile.settings._cache;
+        const now = Date.now();
+        if (cache && cache.expiresAt && now < cache.expiresAt && cache.rawCacheData) {
+          return NextResponse.json(cache.rawCacheData);
+        }
+      }
+    }
     
     // Fetch PR data and monthly stats in parallel
     const [prData, statsData] = await Promise.all([
@@ -41,11 +60,35 @@ export async function GET(req: NextRequest) {
       fetchMonthlyPRStats(accessToken)
     ]);
     
-    // Combine and return the data
-    return NextResponse.json({
+    const combinedData = {
       ...prData,
       ...statsData
-    });
+    };
+
+    if (isFirstPage && username) {
+      const { data: profile } = await supabase
+        .from('github_profiles')
+        .select('settings')
+        .eq('github_username', username)
+        .single();
+      
+      const currentSettings = profile?.settings || {};
+      const updatedSettings = {
+        ...currentSettings,
+        _cache: {
+          rawCacheData: combinedData,
+          expiresAt: Date.now() + 30 * 60 * 1000 // 30 minutes
+        }
+      };
+
+      await supabase
+        .from('github_profiles')
+        .update({ settings: updatedSettings })
+        .eq('github_username', username);
+    }
+    
+    // Combine and return the data
+    return NextResponse.json(combinedData);
   } catch (error) {
     console.error('Error in GitHub data fetch:', error);
     // Type check error before accessing message property

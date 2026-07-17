@@ -5,59 +5,58 @@ import { decrypt } from '@/lib/encryption';
 
 export const runtime = 'edge';
 
-// Updated function to get user PR data from GitHub API
-async function getUserPRData(accessToken) {
-  if (!accessToken) {
-    throw new Error('Authentication required');
-  }
-
-  const results = {
-    prData: null,
-    statsData: null
-  };
-
-  // Setup parallel promises
-  await Promise.all([
-    fetchPullRequests(accessToken)
-      .then(data => { results.prData = data; }),
-    fetchMonthlyPRStats(accessToken)
-      .then(data => { results.statsData = data; })
-  ]);
-
-  // Calculate merge rate
-  const totalPRs = results.prData.counts.total;
-  const mergedPRs = results.prData.counts.merged;
+// Helper to extract badge-specific stats from raw combined GitHub data
+function extractBadgeStats(rawCacheData) {
+  const totalPRs = rawCacheData.counts?.total || 0;
+  const mergedPRs = rawCacheData.counts?.merged || 0;
   const mergeRate = totalPRs > 0 ? Math.round((mergedPRs / totalPRs) * 100) : 0;
-    // Format monthly activity data for the graph
-  const activityData = results.statsData.monthlyData.map(month => ({
-    month: month.name.split(' ')[0].substring(0, 3), // First 3 chars of month name
+  const activityData = (rawCacheData.monthlyData || []).map(month => ({
+    month: month.name.split(' ')[0].substring(0, 3),
     count: month.total
   }));
-  
-  // Return formatted data structure
+
   return {
     totalPRs,
     mergedPRs,
     mergeRate,
     prStatus: {
-      total: results.prData.counts.total,
-      open: results.prData.counts.open,
-      merged: results.prData.counts.merged,
-      closed: results.prData.counts.closed
+      total: totalPRs,
+      open: rawCacheData.counts?.open || 0,
+      merged: mergedPRs,
+      closed: rawCacheData.counts?.closed || 0
     },
-    // Take the last 6 months (or fewer if less data is available)
     activityData: activityData.slice(-6)
   };
 }
 
-// Function to generate line graph path (unchanged)
+// Updated function to get raw user data from GitHub API
+async function getRawUserData(accessToken) {
+  if (!accessToken) {
+    throw new Error('Authentication required');
+  }
+
+  const [prData, statsData] = await Promise.all([
+    fetchPullRequests(accessToken),
+    fetchMonthlyPRStats(accessToken)
+  ]);
+
+  return {
+    ...prData,
+    ...statsData
+  };
+}
+
+// Function to generate line graph path
 function generateLinePath(data, width, height, padding) {
   const availableWidth = width - (padding * 2);
   const availableHeight = height - (padding * 2);
+  if (data.length <= 1) {
+    return { path: "", points: [{ x: padding, y: padding }] };
+  }
   const segmentWidth = availableWidth / (data.length - 1);
   
   // Find max value to scale properly
-  const maxCount = Math.max(...data.map(d => d.count));
+  const maxCount = Math.max(...data.map(d => d.count)) || 1;
   
   // Generate points
   let points = data.map((item, index) => {
@@ -110,17 +109,41 @@ export async function GET(request, { params }) {
   const height = 200;
   
   try {
-    // Extract access token from request headers or cookies
-      const { data } = await supabase
+    // Extract token and settings from database
+    const { data } = await supabase
       .from('github_profiles')
-      .select('encrypted_token, iv')
+      .select('encrypted_token, iv, settings')
       .eq('github_username', username)
       .single()
 
-    const accessToken = await decrypt(data.encrypted_token, data.iv);
-    
-    // Get user data from GitHub API
-    const userData = await getUserPRData(accessToken || null);
+    const settings = data.settings || {};
+    const cache = settings._cache;
+    const now = Date.now();
+
+    let userData;
+
+    if (cache && cache.expiresAt && now < cache.expiresAt && cache.rawCacheData) {
+      userData = extractBadgeStats(cache.rawCacheData);
+    } else {
+      const accessToken = await decrypt(data.encrypted_token, data.iv);
+      const rawCacheData = await getRawUserData(accessToken || null);
+      
+      userData = extractBadgeStats(rawCacheData);
+
+      // Asynchronously update settings with the cached raw data
+      const updatedSettings = {
+        ...settings,
+        _cache: {
+          rawCacheData,
+          expiresAt: now + 30 * 60 * 1000 // 30 minutes
+        }
+      };
+
+      await supabase
+        .from('github_profiles')
+        .update({ settings: updatedSettings })
+        .eq('github_username', username);
+    }
     
     // Calculate section widths (divide evenly into 3 parts)
     const sectionWidth = width / 3;
