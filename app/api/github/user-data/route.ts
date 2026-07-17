@@ -48,8 +48,16 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error in GitHub data fetch:', error);
-    // Type check error before accessing message property
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    if (
+      errorMessage.includes('Decryption failed') || 
+      errorMessage.includes('401') || 
+      errorMessage.includes('Unauthorized') || 
+      errorMessage.includes('Bad credentials') ||
+      errorMessage.includes('Authentication required')
+    ) {
+      return NextResponse.json({ error: 'REAUTH_REQUIRED', message: errorMessage }, { status: 401 });
+    }
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

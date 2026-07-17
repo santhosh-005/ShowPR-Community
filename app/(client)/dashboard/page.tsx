@@ -182,16 +182,31 @@ export default function Dashboard() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 md:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300 flex items-center justify-between">
-          <p className="text-xs md:text-sm">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="ml-4 p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition-colors"
-            title="Refresh page"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
-        </div>
+        error === 'REAUTH_REQUIRED' ? (
+          <div className="mb-4 p-3 md:p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md text-amber-700 dark:text-amber-300 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-sm md:text-base">GitHub Authorization Expired</h3>
+              <p className="text-xs md:text-sm mt-1">Your saved GitHub token has expired, been revoked, or is invalid. Please sign in again to refresh it.</p>
+            </div>
+            <button
+              onClick={() => window.location.href = '/auth/signin'}
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-sm font-medium transition-colors"
+            >
+              Re-authorize Now
+            </button>
+          </div>
+        ) : (
+          <div className="mb-4 p-3 md:p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300 flex items-center justify-between">
+            <p className="text-xs md:text-sm">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="ml-4 p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition-colors"
+              title="Refresh page"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+        )
       )}
 
       <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-3 lg:grid-cols-12">
