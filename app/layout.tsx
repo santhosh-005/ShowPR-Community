@@ -6,7 +6,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://show-pr.vercel.app'),
+  metadataBase: new URL(
+  process.env.NEXT_PUBLIC_BASE_URL ?? "https://show-pr.vercel.app"
+),
   title: {
     default: 'ShowPR - GitHub PR Dashboard',
     template: '%s | ShowPR'
