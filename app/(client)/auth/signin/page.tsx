@@ -8,7 +8,17 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignIn = async () => {
-    setIsLoading(true);
+    const handleSignIn = async () => {
+  setIsLoading(true);
+
+  try {
+    await signIn("github", { callbackUrl: "/dashboard" });
+  } catch (error) {
+    console.error("Authentication error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
     try {
       await signIn("github", { callbackUrl: "/dashboard" });
     } catch (error) {
