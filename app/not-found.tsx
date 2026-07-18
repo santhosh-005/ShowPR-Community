@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { GitPullRequest } from "lucide-react";
 
 export default function NotFound() {
   return (
