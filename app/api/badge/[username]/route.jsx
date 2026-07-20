@@ -313,9 +313,17 @@ export async function GET(request, { params }) {
     console.error('Error fetching PR data:', error);
     
     // Generate error SVG
-    const errorMessage = error.message === 'Authentication required' 
-      ? 'Please login to view your GitHub stats' 
-      : 'Unable to fetch GitHub data';
+    let errorMessage = 'Unable to fetch GitHub data';
+    const msg = error.message || '';
+    if (
+      msg.includes('Authentication required') || 
+      msg.includes('Decryption failed') || 
+      msg.includes('401') || 
+      msg.includes('Unauthorized') || 
+      msg.includes('Bad credentials')
+    ) {
+      errorMessage = 'Re-authorization required. Please log in to ShowPR';
+    }
     
     const errorSvgContent = generateErrorSVG(width, height, errorMessage);
     

@@ -84,7 +84,10 @@ export const SharedStateProvider = ({ children }) => {
       }));
     } catch (err) {
       if (err.name !== 'AbortError') {
-        setError(err.message);
+        const errorMsg = err.response?.data?.error === 'REAUTH_REQUIRED'
+          ? 'REAUTH_REQUIRED'
+          : err.message;
+        setError(errorMsg);
         console.error('Error fetching PR data:', err);
       }
     } finally {
