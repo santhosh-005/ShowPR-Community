@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
 import { encrypt } from '@/lib/encryption'
 import { getToken } from "next-auth/jwt";
+import { validateSettings } from '@/lib/settings-validator';
 
 export async function POST(req) {
   try {
@@ -15,6 +16,14 @@ export async function POST(req) {
 
     // Get settings from request body
     const { settings, githubUsername } = await req.json()
+
+    // Validate the settings payload
+    let validatedSettings;
+    try {
+      validatedSettings = validateSettings(settings);
+    } catch (valErr) {
+      return NextResponse.json({ error: valErr.message }, { status: 400 });
+    }
 
     // Get user data from session
     const accessToken = token.accessToken;
@@ -33,7 +42,7 @@ export async function POST(req) {
         github_username: githubUsername,
         encrypted_token: encryptedData,
         iv: iv,
-        settings,
+        settings: validatedSettings,
         email,
       },
       {
@@ -60,11 +69,19 @@ export async function PATCH(req) {
       )
     }
 
+    // Validate the settings payload
+    let validatedSettings;
+    try {
+      validatedSettings = validateSettings(settings);
+    } catch (valErr) {
+      return NextResponse.json({ error: valErr.message }, { status: 400 });
+    }
+
     // Only update the settings field
     const { data, error } = await supabase
       .from('github_profiles')
       .update({
-        settings: settings,
+        settings: validatedSettings,
       })
       .eq('github_username', githubUsername)
       .select();
