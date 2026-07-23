@@ -41,7 +41,15 @@ export async function POST(req) {
       }
     )
 
-    if (error) return NextResponse.json({ error }, { status: 500 })
+    if (error) {
+      return NextResponse.json({
+        error: {
+          message: error.message || 'Supabase query error',
+          code: error.code || null,
+          details: error.details || null
+        }
+      }, { status: 500 })
+    }
     return NextResponse.json({ data }, { status: 200 })
   } catch (err) {
     console.error('Server error in POST /api/github-profile:', err)
@@ -101,7 +109,15 @@ export async function GET(req) {
       .eq('github_username', username)
       .single()
 
-    if (error) return NextResponse.json({ error }, { status: 500 })
+    if (error) {
+      return NextResponse.json({
+        error: {
+          message: error.message || 'Supabase query error',
+          code: error.code || null,
+          details: error.details || null
+        }
+      }, { status: 500 })
+    }
     return NextResponse.json({ data }, { status: 200 })
 
   } catch (err) {
