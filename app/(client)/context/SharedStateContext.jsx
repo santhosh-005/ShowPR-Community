@@ -171,11 +171,15 @@ export const SharedStateProvider = ({ children }) => {
         const { data, error } = await res.json();
   
         if (!res.ok || error) {
-          console.error("API error:", error);
           if (error?.code === "PGRST116") {
             console.log("No profile data found, creating new profile...");
-            await handleSaveNewUser();
+            try {
+              await handleSaveNewUser();
+            } catch (saveErr) {
+              console.log("Could not auto-save new profile (local mode)");
+            }
           }
+          setProfilePageData(prev => ({ ...prev, dataFetched: true }));
           return;
         }
   
@@ -187,6 +191,8 @@ export const SharedStateProvider = ({ children }) => {
           };
           setProfilePageData(newData);
           setOriginalData(newData);
+        } else {
+          setProfilePageData(prev => ({ ...prev, dataFetched: true }));
         }
       } catch (err) {
         if (err.name !== 'AbortError') {
