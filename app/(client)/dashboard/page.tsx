@@ -15,6 +15,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { StatusCard } from "@/components/dashboard/status-card";
+import { SkeletonCard } from "@/components/dashboard/skeleton-card";
 import { PullRequestCard } from "@/components/dashboard/pr-card";
 import * as Select from "@radix-ui/react-select";
 import { PieChart } from "@/components/dashboard/pie-chart";
@@ -146,15 +147,65 @@ export default function Dashboard() {
     setShowFilters(!showFilters);
   };
 
+  const summaryCards = [
+    {
+      title: "Total PRs",
+      value: summary.total,
+      icon: <FileText className="h-5 w-5" />,
+      mobileIcon: <FileText className="h-4 w-4" />,
+      description: "All pull requests",
+      color: "bg-blue-500",
+    },
+    {
+      title: "Open PRs",
+      value: summary.open,
+      icon: <GitPullRequest className="h-5 w-5" />,
+      mobileIcon: <GitPullRequest className="h-4 w-4" />,
+      description: "Awaiting review",
+      color: "bg-amber-500",
+    },
+    {
+      title: "Merged PRs",
+      value: summary.merged,
+      icon: <GitMerge className="h-5 w-5" />,
+      mobileIcon: <GitMerge className="h-4 w-4" />,
+      description: "Successfully merged",
+      color: "bg-emerald-500",
+    },
+    {
+      title: "Closed PRs",
+      value: summary.closed,
+      icon: <GitPullRequestClosed className="h-5 w-5" />,
+      mobileIcon: <GitPullRequestClosed className="h-4 w-4" />,
+      description: "Closed without merge",
+      color: "bg-red-500",
+    },
+  ];
+
   if (status === "loading") {
     return (
-      <div className="h-screen flex flex-col">
-        <main className="flex-1 flex items-center justify-center">
-          <div>
-            <div className="flex justify-center my-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 dark:border-indigo-400"></div>
+      <div className="container py-4 md:py-8 px-3 md:px-6">
+        <main className="space-y-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-2 animate-pulse">
+              <div className="h-8 w-64 rounded-md bg-gray-300 dark:bg-zinc-700" />
+              <div className="h-3 w-72 rounded-md bg-gray-200 dark:bg-zinc-800" />
             </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">Loading dashboard...</p>
+            <div className="h-9 w-36 rounded-md bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+          </div>
+
+          <div className="md:hidden w-full overflow-x-auto pb-2">
+            <div className="flex space-x-3 min-w-max">
+              {summaryCards.map((card) => (
+                <SkeletonCard key={card.title} />
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden md:grid gap-4 grid-cols-4">
+            {summaryCards.map((card) => (
+              <SkeletonCard key={card.title} />
+            ))}
           </div>
         </main>
       </div>
@@ -198,37 +249,20 @@ export default function Dashboard() {
         {/* Summary Cards - Mobile Scroll View */}
         <div className="md:hidden col-span-1 w-full overflow-x-auto pb-2">
           <div className="flex space-x-3 min-w-max">
-            <StatusCard
-              title="Total PRs"
-              value={loading ? null : summary.total}
-              icon={<FileText className="h-4 w-4" />}
-              description="All pull requests"
-              color="bg-blue-500"
-            />
-
-            <StatusCard
-              title="Open PRs"
-              value={loading ? null : summary.open}
-              icon={<GitPullRequest className="h-4 w-4" />}
-              description="Awaiting review"
-              color="bg-amber-500"
-            />
-
-            <StatusCard
-              title="Merged PRs"
-              value={loading ? null : summary.merged}
-              icon={<GitMerge className="h-4 w-4" />}
-              description="Successfully merged"
-              color="bg-emerald-500"
-            />
-
-            <StatusCard
-              title="Closed PRs"
-              value={loading ? null : summary.closed}
-              icon={<GitPullRequestClosed className="h-4 w-4" />}
-              description="Closed without merge"
-              color="bg-red-500"
-            />
+            {loading
+              ? summaryCards.map((card) => (
+                <SkeletonCard key={card.title} />
+              ))
+              : summaryCards.map((card) => (
+                <StatusCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  icon={card.mobileIcon}
+                  description={card.description}
+                  color={card.color}
+                />
+              ))}
           </div>
         </div>
 
@@ -236,37 +270,20 @@ export default function Dashboard() {
         <div className="col-span-1 md:col-span-2 lg:col-span-8 space-y-4 md:space-y-6">
           {/* Summary Cards - Desktop View */}
           <div className="hidden md:grid gap-4 grid-cols-4">
-            <StatusCard
-              title="Total PRs"
-              value={loading ? null : summary.total}
-              icon={<FileText className="h-5 w-5" />}
-              description="All pull requests"
-              color="bg-blue-500"
-            />
-
-            <StatusCard
-              title="Open PRs"
-              value={loading ? null : summary.open}
-              icon={<GitPullRequest className="h-5 w-5" />}
-              description="Awaiting review"
-              color="bg-amber-500"
-            />
-
-            <StatusCard
-              title="Merged PRs"
-              value={loading ? null : summary.merged}
-              icon={<GitMerge className="h-5 w-5" />}
-              description="Successfully merged"
-              color="bg-emerald-500"
-            />
-
-            <StatusCard
-              title="Closed PRs"
-              value={loading ? null : summary.closed}
-              icon={<GitPullRequestClosed className="h-5 w-5" />}
-              description="Closed without merge"
-              color="bg-red-500"
-            />
+            {loading
+              ? summaryCards.map((card) => (
+                <SkeletonCard key={card.title} />
+              ))
+              : summaryCards.map((card) => (
+                <StatusCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  icon={card.icon}
+                  description={card.description}
+                  color={card.color}
+                />
+              ))}
           </div>
 
           {/* Mobile Filter Toggle Button */}
@@ -392,7 +409,7 @@ export default function Dashboard() {
             ) : !pullRequests?.length ? (
               <div className="rounded-lg border bg-card text-card-foreground shadow h-80 md:h-96 flex items-center justify-center">
                 <div className="p-6 md:p-8 text-center">
-                  <p className="text-muted-foreground text-sm">No pull requests found. You haven't created any pull requests yet.</p>
+                  <p className="text-muted-foreground text-sm">No pull requests found. You have not created any pull requests yet.</p>
                   <button
                     className="inline-flex items-center justify-center rounded-md text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring mt-2"
                     onClick={fetchPRData}
